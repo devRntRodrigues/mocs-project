@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Annotated, Generic, TypeVar
+from typing import Annotated
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
-T = TypeVar("T")
 
-
-class APIResponse(BaseModel, Generic[T]):
+class APIResponse[T](BaseModel):
     model_config = ConfigDict(
         str_strip_whitespace=True,
         validate_default=True,
@@ -25,7 +23,7 @@ class APIResponse(BaseModel, Generic[T]):
     timestamp: Annotated[datetime, Field(description="Response timestamp")]
 
 
-class ListResponse(BaseModel, Generic[T]):
+class ListResponse[T](BaseModel):
     """Response for list endpoints with simple pagination."""
 
     model_config = ConfigDict(
@@ -41,7 +39,7 @@ class ListResponse(BaseModel, Generic[T]):
     timestamp: Annotated[datetime, Field(description="Response timestamp")]
 
 
-def create_response(
+def create_response[T](
     data: T,
     message: str | None = None,
     request_id: str | None = None,
@@ -55,7 +53,7 @@ def create_response(
     )
 
 
-def create_list_response(
+def create_list_response[T](
     data: list[T],
     request_id: str | None = None,
 ) -> ListResponse[T]:
