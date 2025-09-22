@@ -1,11 +1,5 @@
 # MOCS - Document Processing and RAG System
 
-Sistema de processamento de documentos com capacidades de OCR, extração de texto e RAG (Retrieval-Augmented Generation) para análise inteligente de documentos.
-
-## 🚀 Visão Geral
-
-O MOCS é uma aplicação full-stack que permite o upload, processamento e análise inteligente de documentos PDF. O sistema utiliza OCR (Optical Character Recognition) para extrair texto de documentos, armazena os dados em um banco PostgreSQL com extensão pgvector para busca semântica, e oferece uma interface web moderna para interação com os documentos através de perguntas e respostas.
-
 ## 🏗️ Arquitetura
 
 ### Backend (FastAPI + Python)
@@ -54,13 +48,6 @@ O MOCS é uma aplicação full-stack que permite o upload, processamento e anál
 - **Tailwind CSS**: Framework CSS utilitário
 - **Axios**: Cliente HTTP
 - **React Dropzone**: Componente para upload de arquivos
-
-### DevOps
-
-- **Docker**: Containerização da aplicação
-- **Docker Compose**: Orquestração de múltiplos containers
-- **UV**: Gerenciador de dependências Python moderno
-- **Alembic**: Migrações de banco de dados
 
 ## 📋 Pré-requisitos
 
@@ -128,54 +115,6 @@ npm install
 npm run dev
 ```
 
-## 📁 Estrutura do Projeto
-
-```
-mocs-project/
-├── backend/                 # API FastAPI
-│   ├── app/
-│   │   ├── core/           # Configurações e utilitários
-│   │   ├── documents/      # Módulo de documentos
-│   │   ├── rag/           # Módulo RAG
-│   │   └── routers.py     # Roteamento principal
-│   ├── uploads/           # Diretório de uploads
-│   ├── Dockerfile
-│   └── pyproject.toml
-├── frontend/               # Interface Next.js
-│   ├── src/
-│   │   ├── app/           # Páginas Next.js
-│   │   ├── components/    # Componentes React
-│   │   ├── lib/          # Utilitários
-│   │   └── types/        # Tipos TypeScript
-│   ├── Dockerfile
-│   └── package.json
-├── docker-compose.yml     # Orquestração de containers
-└── README.md
-```
-
-## 🎯 Funcionalidades
-
-### Upload e Processamento de Documentos
-
-- Upload de arquivos PDF
-- Extração de texto usando OCR (Tesseract)
-- Armazenamento seguro de documentos
-- Geração de embeddings para busca semântica
-
-### Sistema RAG (Retrieval-Augmented Generation)
-
-- Busca semântica em documentos
-- Geração de respostas contextuais usando GPT-4o-mini
-- Interface de perguntas e respostas
-- Histórico de conversas
-
-### Interface Web
-
-- Upload drag-and-drop de documentos
-- Visualização de documentos processados
-- Chat interface para perguntas
-- Listagem de documentos com paginação
-
 ## 🔒 Segurança
 
 - Validação de tipos de arquivo
@@ -188,66 +127,18 @@ mocs-project/
 
 ### Por que FastAPI?
 
-- Performance superior comparado a outros frameworks Python
-- Documentação automática com OpenAPI/Swagger
-- Validação automática de dados com Pydantic
-- Suporte nativo a async/await
-- Type hints integrados
+Foi o framework para Python que mais utilizei e ele oferece facilidades que considero essenciais, como documentação automática com OpenAPI/Swagger e validação de dados integrada com Pydantic. Isso faz com que eu opte por ele na maioria dos projetos em Python, pela praticidade e agilidade no desenvolvimento.
 
 ### Por que PostgreSQL + pgvector?
 
-- Banco relacional robusto e confiável
-- Extensão pgvector para busca vetorial eficiente
-- Suporte a embeddings de alta dimensão
-- ACID compliance para integridade dos dados
+É o banco de dados que mais utilizo e, por já contar com a extensão pgvector, facilita muito a configuração e o desenvolvimento para implementar buscas vetoriais eficientes e suporte direto a embeddings.
 
 ### Por que LangChain?
 
-- Framework maduro para aplicações de IA
-- Integração nativa com OpenAI
-- Pipeline de RAG pré-construído
-- Facilita manutenção e extensibilidade
+Já utilizei em outros projetos profissionais e gosto bastante do LangChain para desenvolver agents. Por estar familiarizado e por já ter integração pronta com a OpenAI (na qual eu tinha créditos 😅), além de oferecer um pipeline de RAG pré-construído, optei por ele.
 
 ### Por que Next.js?
 
-- Framework React otimizado para produção
-- Server-side rendering (SSR)
-- Roteamento automático
-- Otimizações de performance integradas
-- Excelente experiência de desenvolvimento
-
-### Por que Docker?
-
-- Ambiente de desenvolvimento consistente
-- Facilita deploy em diferentes ambientes
-- Isolamento de dependências
-- Orquestração simplificada com Docker Compose
-
-## 🚀 Deploy
-
-O projeto está configurado para deploy em qualquer ambiente que suporte Docker:
-
-1. Configure as variáveis de ambiente de produção
-2. Execute `docker-compose up -d` no servidor
-3. Configure proxy reverso (nginx) se necessário
-4. Configure SSL/TLS para produção
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📝 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-
-## 📞 Suporte
-
-Para dúvidas ou suporte, entre em contato através dos issues do repositório.
+É um dos padrões mais adotados na indústria moderna e pode ser configurado facilmente pelo CLI, que é bem completo.
 
 ---
-
-**Desenvolvido com ❤️ usando FastAPI, Next.js e OpenAI**
