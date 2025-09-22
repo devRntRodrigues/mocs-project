@@ -1,15 +1,20 @@
 from __future__ import annotations
 
+import asyncio
+import concurrent.futures
 import time
 from datetime import datetime
 from typing import Any
 
 from langchain.chains import RetrievalQA
+from langchain_core.documents import Document
+from langchain_core.retrievers import BaseRetriever
 from loguru import logger
 
 from app.core.vector_store import LangChainPGVectorService
 from app.rag.embeddings import LangChainEmbeddingsService
 from app.rag.llm import LangChainLLMService
+from app.rag.prompts import get_rag_prompt
 from app.rag.schemas import (
     DocumentDeleteResult,
     RAGQuestionResponse,
@@ -42,13 +47,52 @@ class LangChainRAGService:
     ) -> RetrievalQA:
         await self.vector.initialize()
 
-        retriever_kwargs: dict[str, Any] = {"k": max_chunks}
+        class DocumentFilteredRetriever(BaseRetriever):
+            vector_service: Any
+            document_id: int
+            max_chunks: int
+
+            def __init__(self, vector_service, document_id, max_chunks):
+                super().__init__(
+                    vector_service=vector_service, document_id=document_id, max_chunks=max_chunks
+                )
+
+            def _get_relevant_documents(self, query: str) -> list[Document]:
+                # Fallback for sync calls - use thread pool
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(
+                        lambda: asyncio.run(self._aget_relevant_documents(query))
+                    )
+                    return future.result()
+
+            async def _aget_relevant_documents(self, query: str) -> list[Document]:
+                # Native async implementation
+                results = await self.vector_service.search_similar(
+                    query, document_id=self.document_id, limit=self.max_chunks
+                )
+
+                # Convert results to Document objects
+                documents = []
+                for result in results:
+                    doc = Document(
+                        page_content=result["content"],
+                        metadata={
+                            "document_id": result["document_id"],
+                            "chunk_id": result["chunk_id"],
+                            "source": (
+                                f"document_{result['document_id']}_" f"chunk_{result['chunk_id']}"
+                            ),
+                        },
+                    )
+                    documents.append(doc)
+
+                return documents
+
         if document_id is not None:
-            retriever_kwargs["filter"] = {"document_id": document_id}
-
-        retriever = self.vector.as_retriever(**retriever_kwargs)
-
-        from app.rag.prompts import get_rag_prompt
+            retriever = DocumentFilteredRetriever(self.vector, document_id, max_chunks)
+        else:
+            retriever_kwargs: dict[str, Any] = {"k": max_chunks}
+            retriever = self.vector.as_retriever(**retriever_kwargs)
 
         enhanced_prompt = get_rag_prompt()
 
@@ -69,7 +113,7 @@ class LangChainRAGService:
 
         qa_chain = await self.create_retrieval_qa_chain(document_id, max_chunks)
 
-        result = qa_chain({"query": question})
+        result = await qa_chain.ainvoke({"query": question})
 
         processing_time = int((time.perf_counter() - start_time) * 1000)
 
@@ -90,6 +134,6 @@ class LangChainRAGService:
             answer=result["result"],
             source_chunks=source_chunks,
             processing_time_ms=processing_time,
-            method="langchain_retrieval_qa",
+            method="langchain_retrieval_qa_async",
             created_at=datetime.now(),
         )
