@@ -1,5 +1,4 @@
-# Use Python 3.13 image
-FROM python:3.13
+FROM python:3.13.3
 
 # Set working directory
 WORKDIR /app
@@ -23,7 +22,6 @@ ENV UV_SYSTEM_PYTHON=1
 # Copy project files for dependency installation
 COPY pyproject.toml ./
 COPY uv.lock ./
-COPY README.md ./
 
 # Install dependencies globally to avoid venv conflicts with volume mounts
 RUN uv sync --frozen

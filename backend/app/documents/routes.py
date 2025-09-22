@@ -17,6 +17,8 @@ from app.documents.schemas import (
     DocumentSummary,
     DocumentUploadResult,
 )
+from app.rag.depends import RAGServiceDep
+from app.rag.schemas import QuestionRequest, RAGQuestionResponse
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -65,4 +67,21 @@ async def delete_document(
 
     return create_response(
         data=DocumentDeleteResult(deleted=True), message="Document deleted successfully"
+    )
+
+
+@router.post("/{document_id}/question", response_model=APIResponse[RAGQuestionResponse])
+async def ask_document_question(
+    document_id: int,
+    request: QuestionRequest,
+    service: RAGServiceDep,
+) -> APIResponse[RAGQuestionResponse]:
+    request.document_id = document_id
+
+    result = await service.ask_question(
+        question=request.question, document_id=document_id, max_chunks=request.max_chunks
+    )
+
+    return create_response(
+        data=result, message=f"Question processed successfully for document {document_id}"
     )
