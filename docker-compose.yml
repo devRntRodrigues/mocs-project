@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: mocs_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: mocs_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mocs_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: mocs_backend
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE__URL=postgresql+asyncpg://admin:password123@postgres:5432/mocs_db
+      - APP__DEBUG=true
+      - WATCHFILES_IGNORE_PATHS=[".venv/**", "**/__pycache__/**", "**/*.pyc", "**/.git/**", "**/node_modules/**"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./backend/uploads:/app/uploads
+      - /app/.venv
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: mocs_frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

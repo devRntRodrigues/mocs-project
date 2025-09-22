@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import time
 from datetime import datetime
 from typing import Any
@@ -54,6 +55,14 @@ class LangChainRAGService:
                 super().__init__(
                     vector_service=vector_service, document_id=document_id, max_chunks=max_chunks
                 )
+
+            def _get_relevant_documents(self, query: str) -> list[Document]:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    return loop.run_until_complete(self._aget_relevant_documents(query))
+                finally:
+                    loop.close()
 
             async def _aget_relevant_documents(self, query: str) -> list[Document]:
                 results = await self.vector_service.search_similar(
