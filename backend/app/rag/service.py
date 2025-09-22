@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import asyncio
-import concurrent.futures
 import time
 from datetime import datetime
 from typing import Any
@@ -57,21 +55,11 @@ class LangChainRAGService:
                     vector_service=vector_service, document_id=document_id, max_chunks=max_chunks
                 )
 
-            def _get_relevant_documents(self, query: str) -> list[Document]:
-                # Fallback for sync calls - use thread pool
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(
-                        lambda: asyncio.run(self._aget_relevant_documents(query))
-                    )
-                    return future.result()
-
             async def _aget_relevant_documents(self, query: str) -> list[Document]:
-                # Native async implementation
                 results = await self.vector_service.search_similar(
                     query, document_id=self.document_id, limit=self.max_chunks
                 )
 
-                # Convert results to Document objects
                 documents = []
                 for result in results:
                     doc = Document(
