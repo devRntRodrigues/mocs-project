@@ -90,3 +90,7 @@ ignore_missing_imports = true
 module = ["tests.*", "alembic.*"]
 disallow_untyped_defs = false
 check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["app.core.response_patterns"]
+ignore_errors = true

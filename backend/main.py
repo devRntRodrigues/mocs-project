@@ -8,7 +8,7 @@ from app.core.app import get_application
 from app.core.config import settings
 
 
-def main():
+def main() -> None:
     """Run the FastAPI application."""
     if settings.app.debug:
         # Use import string for reload to work properly
